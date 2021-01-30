@@ -46,7 +46,7 @@ if (isset($_POST['reg_user'])) {
   }
   // Finally, register user if there are no errors in the form
   if (count($errors) == 0) {
-  	$password = md5($password_1);//encrypt the password before saving in the database
+  	$password = password_hash($password_1, PASSWORD_DEFAULT);//encrypt the password before saving in the database
   	$query = "INSERT INTO users (username, email, password, name, mobilenumber, gender, hobbies) 
   			  VALUES(?, ?, ?, ?, ?, ?, ?)";
 	if($stmt = mysqli_prepare($db, $query) {
@@ -74,7 +74,12 @@ if (isset($_POST['login_user'])) {
     }
   
     if (count($errors) == 0) {
-        $password = md5($password);
+	$hashedpass = "SELECT 'password' FROM `users` WHERE username=?";
+	if($stmt = mysqli_prepare($db, $hashedpass) {
+		mysqli_stmt_bind_param($stmt, "s", $username;
+		mysqli_stmt_execute($stmt);
+	}
+        $password = password_verify($password, $hashedpass);
         $query = "SELECT * FROM users WHERE username=? AND password=?";
         if($stmt = mysqli_prepare($db, $query) {
 		mysqli_stmt_bind_param($stmt, "ss", $username, $password);
