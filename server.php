@@ -26,6 +26,7 @@ if (isset($_POST['reg_user'])) {
   if (empty($mobilenumber)) { array_push($errors, "mobilenumber is required"); }
   if (empty($gender)) { array_push($errors, "gender is required"); }
   if (empty($hobbies)) { array_push($errors, "hobbies is required"); }
+  if($gender != "male" || $gender != "female") { array_push($errors, "Invalid gender type"); }
   if ($password_1 != $password_2) {
 	array_push($errors, "The two passwords do not match");
   }
@@ -45,13 +46,18 @@ if (isset($_POST['reg_user'])) {
   }
   // Finally, register user if there are no errors in the form
   if (count($errors) == 0) {
-  	$password = md5($password_1);//encrypt the password before saving in the database
+  	$password = password_hash($password_1, PASSWORD_DEFAULT);//encrypt the password before saving in the database
   	$query = "INSERT INTO users (username, email, password, name, mobilenumber, gender, hobbies) 
-  			  VALUES('$username', '$email', '$password', '$name', '$mobilenumber', '$gender', '$hobbies')";
-  	mysqli_query($db, $query);
+  			  VALUES(?, ?, ?, ?, ?, ?, ?)";
+	if($stmt = mysqli_prepare($db, $query) {
+		mysqli_stmt_bind_param($stmt, "sssssss", $username, $email, $password, $name, $mobilenumber, $gender, $hobbies);
+		mysqli_stmt_execute($stmt);
+	}
   	$_SESSION['username'] = $username;
   	$_SESSION['success'] = "You are now logged in";
   	header('location: login.php');
+        mysqli_stmt_close($stmt);
+	mysqli_close($db);
   }
 }
 // ... 
@@ -68,17 +74,28 @@ if (isset($_POST['login_user'])) {
     }
   
     if (count($errors) == 0) {
-        $password = md5($password);
-        $query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
-        $results = mysqli_query($db, $query);
+	$hashedpass = "SELECT 'password' FROM `users` WHERE username=?";
+	if($stmt = mysqli_prepare($db, $hashedpass) {
+		mysqli_stmt_bind_param($stmt, "s", $username;
+		mysqli_stmt_execute($stmt);
+	}
+        $password = password_verify($password, $hashedpass);
+        $query = "SELECT * FROM users WHERE username=? AND password=?";
+        if($stmt = mysqli_prepare($db, $query) {
+		mysqli_stmt_bind_param($stmt, "ss", $username, $password);
+		mysqli_stmt_execute($stmt);
+	}
         if (mysqli_num_rows($results) == 1) {
           $_SESSION['username'] = $username;
           $_SESSION['success'] = "You are now logged in";
           header('location: index.php');
+        mysqli_stmt_close($stmt);
+	mysqli_close($db);
         }else {
             array_push($errors, "Wrong username/password combination");
         }
     }
   }
+
   
   ?>
