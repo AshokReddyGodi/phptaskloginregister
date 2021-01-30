@@ -40,8 +40,8 @@
       </div>
       <div class="input-group">
   	  <label>Gender:</label>
-        Male<input type="radio" name="gender">
-  	  Female<input type="radio" name="gender">
+        Male<input type="radio" name="gender" value="male">
+  	  Female<input type="radio" name="gender" value="female">
       </div>
       <div class="input-group">
   	  <label>Hobbies:</label>
